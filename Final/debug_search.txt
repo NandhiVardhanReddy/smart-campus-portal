@@ -1,0 +1,14 @@
+DEBUG: Query: dslab, Type: semantic
+DEBUG: Results is None
+DEBUG: Executing fallback...
+DEBUG: Total docs in DB: 5
+DEBUG: Matching docs: 1
+DEBUG: Mongo Query: {'$or': [{'title': {'$regex': 'dslab', '$options': 'i'}}, {'content': {'$regex': 'dslab', '$options': 'i'}}, {'tags': {'$regex': 'dslab', '$options': 'i'}}]}
+DEBUG: Fallback found 1 results
+DEBUG: Query: dbms, Type: semantic
+DEBUG: Results is None
+DEBUG: Executing fallback...
+DEBUG: Total docs in DB: 5
+DEBUG: Matching docs: 1
+DEBUG: Mongo Query: {'$or': [{'title': {'$regex': 'dbms', '$options': 'i'}}, {'content': {'$regex': 'dbms', '$options': 'i'}}, {'tags': {'$regex': 'dbms', '$options': 'i'}}]}
+DEBUG: Fallback found 1 results

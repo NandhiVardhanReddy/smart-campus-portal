@@ -1,0 +1,1985 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Smart Library — Teacher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: linear-gradient(135deg, #f0f4ff, #fff7fb);
+            --panel: rgba(255, 255, 255, 0.76);
+            --card: rgba(255, 255, 255, 0.96);
+            --accent1: #7c3aed;
+            --accent2: #06b6d4;
+            --muted: #64748b;
+            --text: #0f172a;
+            --radius: 12px;
+            --sidebar-w: 260px;
+            --shadow: 0 12px 40px rgba(2, 6, 23, 0.06);
+            --page-size: 10;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            padding: 18px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Dark mode */
+        body.dark-mode {
+            --bg: linear-gradient(135deg, #0f172a, #1e293b);
+            --panel: rgba(30, 41, 59, 0.76);
+            --card: rgba(30, 41, 59, 0.96);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --shadow: 0 12px 40px rgba(2, 6, 23, 0.2);
+        }
+
+        /* layout */
+        .app {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: var(--sidebar-w) 1fr;
+            gap: 18px;
+        }
+
+        .sidebar {
+            background: var(--panel);
+            padding: 16px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            height: calc(100vh - 36px);
+            position: sticky;
+            top: 18px;
+            overflow: auto;
+        }
+
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800
+        }
+
+        .roleArea {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .roleSelect {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .roleSelect select {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .nav {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px
+        }
+
+        .nav button {
+            background: transparent;
+            border: none;
+            padding: 10px;
+            text-align: left;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text);
+            transition: background-color 0.2s;
+        }
+
+        .nav button:hover {
+            background: linear-gradient(90deg, rgba(124, 58, 237, 0.06), rgba(6, 182, 212, 0.03));
+        }
+
+        .nav button.active {
+            background: linear-gradient(90deg, rgba(124, 58, 237, 0.12), rgba(6, 182, 212, 0.06));
+        }
+
+        /* collapsible upload in sidebar */
+        .uploadToggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.04);
+            cursor: pointer;
+            background: transparent;
+            margin-top: 14px
+        }
+
+        .uploadContent {
+            margin-top: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            background: linear-gradient(180deg, var(--card), var(--panel));
+            border: 1px solid rgba(255, 255, 255, 0.1)
+        }
+
+        .uploadContent input[type="file"] {
+            width: 100%
+        }
+
+        .uploadRow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(124, 58, 237, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* center panel */
+        .center {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            gap: 14px
+        }
+
+        .headerBar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow)
+        }
+
+        .searchBox {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            width: 100%
+        }
+
+        .input {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: var(--card);
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            width: 100%
+        }
+
+        .input input {
+            border: 0;
+            outline: 0;
+            padding: 10px;
+            background: transparent;
+            width: 100%;
+            color: var(--text);
+        }
+
+        .searchBtn {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .searchBtn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        /* search type buttons */
+        .search-type {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px
+        }
+
+        .search-type-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            background: var(--card);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s
+        }
+
+        .search-type-btn.active {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+            border-color: transparent
+        }
+
+        /* page container */
+        .page {
+            display: none
+        }
+
+        .page.active {
+            display: block
+        }
+
+        /* results */
+        .resultsGrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px
+        }
+
+        .resultCard {
+            background: linear-gradient(180deg, var(--card), var(--panel));
+            padding: 12px;
+            border-radius: 12px;
+            border-left: 6px solid var(--accent1);
+            box-shadow: 0 8px 24px rgba(9, 30, 66, 0.04)
+        }
+
+        .resultTitle {
+            font-weight: 700
+        }
+
+        .resultSnippet {
+            color: var(--muted);
+            margin-top: 8px
+        }
+
+        /* library page */
+        .controlsRow {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+        .select,
+        .btn,
+        .small-btn {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            background: var(--card);
+            cursor: pointer;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        .btn:hover,
+        .small-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+            border: none
+        }
+
+        .gridView {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px
+        }
+
+        .cardItem {
+            background: var(--card);
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(9, 30, 66, 0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .cardItem:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(9, 30, 66, 0.08);
+        }
+
+        .listView .cardItem {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px
+        }
+
+        /* pagination */
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px
+        }
+
+        .pageBtn {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            cursor: pointer;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .pageBtn.active {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: #fff;
+        }
+
+        /* modal */
+        .modalOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999
+        }
+
+        .modalBox {
+            width: 900px;
+            max-width: 96%;
+            max-height: 92%;
+            background: var(--card);
+            padding: 14px;
+            border-radius: 12px;
+            overflow: auto;
+            color: var(--text);
+        }
+
+        /* common helpers */
+        .hidden {
+            display: none
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 24px;
+            background: #111827;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.2);
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity .18s
+        }
+
+        .toast.show {
+            opacity: 1
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--accent1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 4px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(124, 58, 237, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--accent1);
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .review-item {
+            margin-bottom: 12px;
+            padding: 12px;
+            background: var(--panel);
+            border-radius: 8px;
+        }
+
+        .review-question {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .review-answer {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* Review display styles */
+        .review-display {
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--panel);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent1);
+        }
+
+        .review-text {
+            margin-bottom: 8px;
+        }
+
+        .review-meta {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .review-author {
+            font-weight: 600;
+        }
+
+        /* Request page styles */
+        .requests-container {
+            margin-top: 12px;
+        }
+
+        .request-card {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent1);
+            box-shadow: var(--shadow);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .request-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .request-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .request-description {
+            margin-top: 8px;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .request-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .status-fulfilled {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+
+        .small {
+            font-size: 13px;
+            color: var(--muted)
+        }
+
+        @media (max-width:1100px) {
+            .gridView {
+                grid-template-columns: 1fr
+            }
+
+            .app {
+                grid-template-columns: 1fr
+            }
+
+            .sidebar {
+                position: relative;
+                height: auto;
+                top: 0
+            }
+
+            .resultsGrid {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">SL</div>
+                <div>
+                    <div style="font-weight:800">Smart Library</div>
+                    <div class="small">Teacher Portal</div>
+                </div>
+            </div>
+
+            <!-- Role Info -->
+            <div class="roleArea">
+                <div style="font-weight:700">Role</div>
+                <div class="roleSelect">
+                    <div class="small" style="font-weight:600;color:var(--accent1)">Teacher</div>
+                    <div class="small">👨‍🏫 Educator</div>
+                </div>
+            </div>
+
+            <!-- nav -->
+            <nav class="nav" aria-label="Main navigation">
+                <button onclick="showPage('library')" id="nav-library" class="active">📚 Library</button>
+                <button onclick="showPage('uploads')" id="nav-uploads">📁 Uploads</button>
+                <button onclick="showPage('bookmarks')" id="nav-bookmarks">🔖 Bookmarks</button>
+                <button onclick="showPage('requests')" id="nav-requests">📋 Requests</button>
+                <button onclick="showPage('settings')" id="nav-settings">⚙ Settings</button>
+            </nav>
+
+            <!-- collapsible upload -->
+            <div class="uploadToggle" id="uploadToggle" onclick="toggleUpload()">
+                <div style="font-weight:700">Upload Material</div>
+                <div id="uploadToggleIcon">►</div>
+            </div>
+            <div class="uploadContent hidden" id="uploadContent" aria-hidden="true">
+                <div style="font-weight:600">Add file</div>
+                <input id="miniFile" type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg" />
+                <div class="progress-bar hidden" id="uploadProgressBar">
+                    <div class="progress" id="uploadProgress"></div>
+                </div>
+                <div class="uploadRow">
+                    <input id="miniTitle" placeholder="Title (optional)"
+                        style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06); background: var(--card); color: var(--text);" />
+                </div>
+                <div class="uploadRow">
+                    <select id="miniSubject"
+                        style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06); background: var(--card); color: var(--text);">
+                        <option>Computer Science</option>
+                        <option>Math</option>
+                        <option>Physics</option>
+                        <option>Electronics</option>
+                    </select>
+                    <button class="btn" onclick="miniUpload()">Upload</button>
+                </div>
+            </div>
+
+            <div style="margin-top:14px" class="small">
+                <div style="font-weight:700">Quick Actions</div>
+                <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn" onclick="openRequestModal()">Make Request</button>
+                </div>
+            </div>
+
+            <div style="margin-top:14px" class="small">
+                <div style="font-weight:700">Profile</div>
+                <div>Teacher</div>
+            </div>
+        </aside>
+
+        <!-- CENTER -->
+        <main class="center">
+
+            <!-- header/search -->
+            <div class="headerBar">
+                <div style="display:flex;gap:12px;align-items:center;width:100%">
+                    <div
+                        style="width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2))">
+                    </div>
+                    <div style="flex:1">
+                        <div style="font-weight:800;font-size:18px" id="pageTitle">Library</div>
+                        <div class="small" id="pageSubtitle">All materials with integrated search</div>
+                    </div>
+                    <div style="width:420px">
+                        <div class="searchBox">
+                            <div class="search-type">
+                                <button class="search-type-btn active" data-type="semantic">Semantic</button>
+                                <button class="search-type-btn" data-type="keyword">Keyword</button>
+                                <button class="search-type-btn" data-type="hybrid">Hybrid</button>
+                            </div>
+                            <div class="input">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                                    <path d="M21 21l-4.35-4.35" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    <circle cx="11" cy="11" r="6" stroke="#9CA3AF" stroke-width="2" />
+                                </svg>
+                                <input id="topSearch" placeholder="Search library..."
+                                    onkeydown="if(event.key==='Enter') topSearch()" />
+                            </div>
+                            <button class="searchBtn" onclick="topSearch()">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGES -->
+            <!-- LIBRARY PAGE -->
+            <section id="page-library" class="page active">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-weight:800">Library</div>
+                        <div class="small">All uploaded and indexed documents</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div class="small">View:</div>
+                        <button class="small-btn" onclick="setView('list')" id="viewListBtn"
+                            style="font-weight:800">List</button>
+                        <button class="small-btn" onclick="setView('grid')" id="viewGridBtn">Grid</button>
+                        <select id="sortSelect" class="select" onchange="renderLibrary(1)">
+                            <option value="likes">Sort: Most Liked</option>
+                            <option value="newest">Newest</option>
+                            <option value="oldest">Oldest</option>
+                            <option value="az">A → Z</option>
+                            <option value="za">Z → A</option>
+                            <option value="subject">Subject</option>
+                            <option value="type">Type</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="controlsRow" style="margin-top:10px">
+                    <select id="filterSubject" onchange="renderLibrary(1)" class="select">
+                        <option value="">All Subjects</option>
+                        <option>Computer Science</option>
+                        <option>Math</option>
+                        <option>Physics</option>
+                        <option>Electronics</option>
+                    </select>
+                    <select id="filterType" onchange="renderLibrary(1)" class="select">
+                        <option value="">All Types</option>
+                        <option>pdf</option>
+                        <option>txt</option>
+                        <option>image</option>
+                    </select>
+                    <button class="small-btn" onclick="clearLibraryFilters()">Clear</button>
+                </div>
+
+                <!-- Search Results Area -->
+                <div id="searchResultsArea" style="margin-top:12px; display: none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <div style="font-weight:700">Search Results</div>
+                        <button class="btn" onclick="clearSearch()">Show All Documents</button>
+                    </div>
+                    <div id="searchResultsContainer"></div>
+                </div>
+
+                <!-- Library Content -->
+                <div id="libraryContainer" style="margin-top:12px"></div>
+
+                <div class="pagination" id="libraryPagination"></div>
+            </section>
+
+            <!-- UPLOADS PAGE -->
+            <section id="page-uploads" class="page">
+                <div style="font-weight:800">Uploads</div>
+                <div class="small">Use this page to upload materials. After upload you'll be redirected to Library.
+                </div>
+
+                <div
+                    style="margin-top:12px;padding:12px;border-radius:10px;background:linear-gradient(180deg,var(--card),var(--panel));border:1px solid rgba(255,255,255,0.1)">
+                    <input id="fullFile" type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg" />
+                    <div class="progress-bar hidden" id="fullUploadProgressBar">
+                        <div class="progress" id="fullUploadProgress"></div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                        <input id="fullTitle" placeholder="Title (optional)"
+                            style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06); background: var(--card); color: var(--text);" />
+                        <select id="fullSubject"
+                            style="padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06); background: var(--card); color: var(--text);">
+                            <option>Computer Science</option>
+                            <option>Math</option>
+                            <option>Physics</option>
+                            <option>Electronics</option>
+                        </select>
+                        <button class="btn-primary" onclick="fullUpload()">Upload</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BOOKMARKS -->
+            <section id="page-bookmarks" class="page">
+                <div style="font-weight:800">Bookmarks</div>
+                <div class="small">Your saved items</div>
+                <div id="bookmarksContainer" style="margin-top:12px"></div>
+            </section>
+
+            <!-- REQUESTS PAGE -->
+            <section id="page-requests" class="page">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-weight:800">Material Requests</div>
+                        <div class="small">Request materials you need for your studies</div>
+                    </div>
+                    <button class="btn-primary" onclick="openRequestModal()">+ New Request</button>
+                </div>
+
+                <div class="requests-container" id="requestsContainer">
+                    <!-- Requests will be rendered here -->
+                </div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="page-settings" class="page">
+                <div style="font-weight:800">Settings</div>
+                <div class="small">Theme, export/import, clear storage</div>
+
+                <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+                    <label class="small">Dark Mode</label>
+                    <button class="btn" onclick="toggleDark()">Toggle</button>
+                </div>
+
+                <div style="margin-top:12px;display:flex;gap:8px">
+                    <button class="btn" onclick="exportLibrary()">Export Library JSON</button>
+                    <input id="importFile" type="file" accept=".json" />
+                    <button class="btn" onclick="importLibrary()">Import</button>
+                    <button class="btn" onclick="clearStorage()">Clear Storage</button>
+                </div>
+
+                <!-- Developer Tools Section -->
+
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- modals, toast -->
+    <div id="modalRoot"></div>
+    <div id="toast" class="toast">Done</div>
+
+    <script>
+        /* UTILITIES & STATE */
+        const PAGE_SIZE = 10;
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        const state = {
+            docs: [],
+            results: [],
+            view: 'list',
+            currentPage: 1,
+            currentLibraryPage: 1,
+            selected: null,
+            role: 'teacher',
+            darkMode: localStorage.getItem('smart_dark') === 'true',
+            backendConnected: false,
+            isSearching: false,
+            currentQuery: '',
+            requests: JSON.parse(localStorage.getItem('smart_requests') || '[]')
+        };
+
+        function uid() { return 'd_' + Math.random().toString(36).slice(2, 9) }
+        function now() { return new Date().toISOString() }
+        function escapeHtml(s) { if (!s) return ''; return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+        function showToast(msg, t = 1800) { const el = document.getElementById('toast'); el.innerText = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), t); }
+
+        /* INIT FUNCTION */
+        async function init() {
+            await checkBackendHealth();
+            await loadDocs();
+            renderLibrary(1);
+            renderBookmarks();
+            renderRequests();
+
+            if (state.darkMode) {
+                document.body.classList.add('dark-mode');
+            }
+
+            const searchTypeBtns = document.querySelectorAll('.search-type-btn');
+            searchTypeBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    searchTypeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            document.addEventListener('keydown', e => {
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    document.getElementById('topSearch').focus();
+                }
+                if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') {
+                    e.preventDefault();
+                    toggleDark();
+                }
+            });
+        }
+
+        /* BACKEND HEALTH CHECK */
+        async function checkBackendHealth() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                state.backendConnected = true;
+                return true;
+            } catch (error) {
+                console.error('Backend connection failed:', error);
+                state.backendConnected = false;
+                return false;
+            }
+        }
+
+        /* API FUNCTIONS */
+        async function apiRequest(endpoint, options = {}) {
+            try {
+                // FIXED FETCH WRAPPER
+                const isFormData = options.body instanceof FormData;
+
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    ...options,
+                    headers: isFormData
+                        ? (options.headers || {})  // No Content-Type for FormData
+                        : {
+                            'Content-Type': 'application/json',
+                            ...(options.headers || {})
+                        }
+                });
+
+
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('API request failed:', error);
+                throw error;
+            }
+        }
+
+        /* STORAGE */
+        async function loadDocs() {
+            try {
+                const data = await apiRequest('/documents?page_size=100');
+                state.docs = data.documents || [];
+            } catch (error) {
+                console.error('Failed to load documents:', error);
+                const localDocs = JSON.parse(localStorage.getItem('smart_docs') || '[]');
+                state.docs = localDocs;
+            }
+        }
+
+        /* PAGE NAVIGATION */
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+
+            const pageMap = {
+                library: 'page-library',
+                uploads: 'page-uploads',
+                bookmarks: 'page-bookmarks',
+                requests: 'page-requests',
+                settings: 'page-settings'
+            };
+
+            const pageId = pageMap[page] || 'page-library';
+            document.getElementById(pageId).classList.add('active');
+            document.getElementById(`nav-${page}`).classList.add('active');
+
+            const titleMap = {
+                library: 'Library',
+                uploads: 'Uploads',
+                bookmarks: 'Bookmarks',
+                requests: 'Requests',
+                settings: 'Settings'
+            };
+
+            const subtitleMap = {
+                library: 'All materials with integrated search',
+                uploads: 'Single-file upload',
+                bookmarks: 'Saved items',
+                requests: 'Request materials you need',
+                settings: 'Preferences & export'
+            };
+
+            document.getElementById('pageTitle').innerText = titleMap[page] || 'Library';
+            document.getElementById('pageSubtitle').innerText = subtitleMap[page] || '';
+
+            if (page === 'library') renderLibrary(1);
+            if (page === 'bookmarks') renderBookmarks();
+            if (page === 'requests') renderRequests();
+        }
+
+        /* UPLOAD FUNCTIONS */
+        function toggleUpload(open) {
+            const content = document.getElementById('uploadContent');
+            const icon = document.getElementById('uploadToggleIcon');
+            const isOpen = !content.classList.contains('hidden');
+            const to = typeof open === 'boolean' ? open : !isOpen;
+
+            if (to) {
+                content.classList.remove('hidden');
+                icon.innerText = '▼';
+                content.setAttribute('aria-hidden', 'false');
+            } else {
+                content.classList.add('hidden');
+                icon.innerText = '►';
+                content.setAttribute('aria-hidden', 'true');
+            }
+        }
+
+        async function uploadFile(file, title, subject, isFullUpload = false) {
+            const progressBar = document.getElementById(isFullUpload ? 'fullUploadProgressBar' : 'uploadProgressBar');
+            const progressElement = document.getElementById(isFullUpload ? 'fullUploadProgress' : 'uploadProgress');
+
+            progressBar.classList.remove('hidden');
+            let progress = 0;
+
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                }
+                progressElement.style.width = `${progress}%`;
+            }, 200);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('title', title);
+                formData.append('subject', subject);
+                formData.append('document_type', getDocumentType(file.name));
+                formData.append('author', 'Teacher');
+
+                const result = await apiRequest('/documents', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressElement.style.width = '100%';
+                setTimeout(() => {
+                    progressBar.classList.add('hidden');
+                }, 500);
+
+                showToast('Uploaded ✓');
+
+                if (isFullUpload) {
+                    document.getElementById('fullFile').value = '';
+                    document.getElementById('fullTitle').value = '';
+                } else {
+                    document.getElementById('miniFile').value = '';
+                    document.getElementById('miniTitle').value = '';
+                    toggleUpload(false);
+                }
+
+                await loadDocs();
+                showPage('library');
+
+                return result;
+
+            } catch (error) {
+                console.error('Upload failed:', error);
+                clearInterval(progressInterval);
+                progressBar.classList.add('hidden');
+                showToast('Upload failed. Please try again.');
+            }
+        }
+
+        function getDocumentType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['pdf'].includes(ext)) return 'pdf';
+            if (['txt', 'md'].includes(ext)) return 'note';
+            if (['doc', 'docx'].includes(ext)) return 'document';
+            if (['png', 'jpg', 'jpeg'].includes(ext)) return 'image';
+            return 'file';
+        }
+
+        function generateTags(title, subject) {
+            const tags = [];
+            if (subject) tags.push(subject.split(' ')[0]);
+
+            const keywords = ['notes', 'lecture', 'lab', 'assignment', 'project', 'exam', 'quiz', 'tutorial'];
+            keywords.forEach(keyword => {
+                if (title.toLowerCase().includes(keyword)) {
+                    tags.push(keyword.charAt(0).toUpperCase() + keyword.slice(1));
+                }
+            });
+
+            return tags.slice(0, 3);
+        }
+
+        function miniUpload() {
+            const file = document.getElementById('miniFile').files[0];
+            const title = document.getElementById('miniTitle').value || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Untitled');
+            const subject = document.getElementById('miniSubject').value || 'General';
+
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            uploadFile(file, title, subject, false);
+        }
+
+        function fullUpload() {
+            const file = document.getElementById('fullFile').files[0];
+            const title = document.getElementById('fullTitle').value || (file ? file.name.replace(/\.[^/.]+$/, "") : 'Untitled');
+            const subject = document.getElementById('fullSubject').value || 'General';
+
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
+            uploadFile(file, title, subject, true);
+        }
+        /* LIBRARY RENDER */
+        function getFilteredSortedDocs() {
+            const subj = document.getElementById('filterSubject') ? document.getElementById('filterSubject').value : '';
+            const type = document.getElementById('filterType') ? document.getElementById('filterType').value : '';
+            const sort = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'likes';
+            let list = state.docs.slice();
+
+            if (subj) list = list.filter(d => d.subject === subj);
+            if (type) {
+                if (type === 'image') list = list.filter(d => ['png', 'jpg', 'jpeg'].includes((d.type || '').toLowerCase()));
+                else list = list.filter(d => (d.type || '').toLowerCase() === type.toLowerCase());
+            }
+
+            if (sort === 'likes') list.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            if (sort === 'newest') list.sort((a, b) => new Date(b.uploadedAt || b.created_at || b.uploaded_at) - new Date(a.uploadedAt || a.created_at || a.uploaded_at));
+            if (sort === 'oldest') list.sort((a, b) => new Date(a.uploadedAt || a.created_at || a.uploaded_at) - new Date(b.uploadedAt || b.created_at || b.uploaded_at));
+            if (sort === 'az') list.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+            if (sort === 'za') list.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+            if (sort === 'subject') list.sort((a, b) => (a.subject || '').localeCompare(b.subject || ''));
+            if (sort === 'type') list.sort((a, b) => (a.document_type || a.type || '').localeCompare(b.document_type || b.type || ''));
+
+            return list;
+        }
+
+
+        function renderLibrary(page = 1, highlightId = null) {
+            const container = document.getElementById('libraryContainer');
+            const searchResultsArea = document.getElementById('searchResultsArea');
+
+            // Hide the old search results area as we will render everything in libraryContainer
+            if (searchResultsArea) searchResultsArea.style.display = 'none';
+            container.style.display = 'block';
+
+            const isSearching = state.isSearching;
+            let list = [];
+
+            if (isSearching) {
+                list = state.results;
+            } else {
+                list = getFilteredSortedDocs();
+            }
+
+            const view = state.view || 'list';
+
+            // Update view buttons
+            if (document.getElementById('viewListBtn')) document.getElementById('viewListBtn').style.fontWeight = view === 'list' ? '800' : '600';
+            if (document.getElementById('viewGridBtn')) document.getElementById('viewGridBtn').style.fontWeight = view === 'grid' ? '800' : '600';
+
+            const total = list.length;
+            const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            if (page < 1) page = 1;
+            if (page > totalPages) page = totalPages;
+
+            state.currentLibraryPage = page;
+            const start = (page - 1) * PAGE_SIZE;
+            const pageItems = list.slice(start, start + PAGE_SIZE);
+
+            let html = '';
+
+            // Search Header
+            if (isSearching) {
+                html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <div style="font-weight:700">Search Results (${total})</div>
+                    <button class="btn" onclick="clearSearch()">Show All Documents</button>
+                </div>`;
+            }
+
+            if (pageItems.length === 0) {
+                html += `<div style="text-align:center;padding:40px;color:var(--muted)">
+                    <div>${isSearching ? `No results found for "${escapeHtml(state.currentQuery)}"` : 'No documents found'}</div>
+                    <div class="small" style="margin-top:8px">${isSearching ? 'Try different keywords' : 'Try changing your filters or upload new materials'}</div>
+                </div>`;
+            } else if (view === 'grid') {
+                html += `<div class="gridView">`;
+                pageItems.forEach(item => {
+                    const doc = isSearching ? item.document : item;
+                    const docType = doc.document_type || doc.type || 'file';
+                    const tagsHtml = (doc.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+                    const likes = doc.likes || 0;
+
+                    // Search specific
+                    let matchBadge = '';
+                    let snippet = escapeHtml((doc.content || '').slice(0, 120)) + '...';
+
+                    if (isSearching) {
+                        const scorePercent = Math.round((item.score || 0) * 100);
+                        matchBadge = `<span class="tag" style="background:rgba(124,58,237,0.1);color:var(--accent1)">${scorePercent}% Match</span>`;
+                        if (item.highlights && item.highlights.length > 0) {
+                            snippet = item.highlights.slice(0, 2).map(h => `<p>...${escapeHtml(h)}...</p>`).join('');
+                        }
+                    }
+
+                    html += `<div class="cardItem" id="card_${doc.id}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                            <div style="font-weight:700">${escapeHtml(doc.title || doc.filename)}</div>
+                            ${matchBadge}
+                        </div>
+                        <div class="small">${escapeHtml(doc.subject || '—')} • ${escapeHtml(docType)}</div>
+                        <div style="margin-top:4px">${tagsHtml}</div>
+                        <div style="margin-top:8px" class="small">${snippet}</div>
+                        
+                        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+                          <button class="btn" onclick="selectAndOpen('${doc.id}')">Open</button>
+                          <button class="btn" onclick="bookmarkDoc('${doc.id}')">Bookmark</button>
+                          
+                          <span class="btn" style="cursor:default;background:transparent;border:1px solid rgba(15,23,42,0.1)">❤️ ${likes}</span>
+                          <button class="btn" onclick="openReviewModal('${doc.id}')">Review</button>
+                          
+                          <button class="btn" onclick="deleteDoc('${doc.id}')">Delete</button>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            } else {
+                // List View
+                html += `<div class="listView">`;
+                pageItems.forEach(item => {
+                    const doc = isSearching ? item.document : item;
+                    const docType = doc.document_type || doc.type || 'file';
+                    const tagsHtml = (doc.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+                    const uploadDate = doc.created_at || doc.uploadedAt || doc.uploaded_at;
+                    const likes = doc.likes || 0;
+                    const reviewsCount = (doc.reviews && doc.reviews.length) || 0;
+
+                    // Search specific
+                    let matchBadge = '';
+                    if (isSearching) {
+                        const scorePercent = Math.round((item.score || 0) * 100);
+                        matchBadge = `<span class="tag" style="background:rgba(124,58,237,0.1);color:var(--accent1)">${scorePercent}% Match</span>`;
+                    }
+
+                    html += `<div class="cardItem" id="card_${doc.id}">
+                        <div style="flex:1">
+                          <div style="display:flex;align-items:center;gap:8px">
+                             <div style="font-weight:700">${escapeHtml(doc.title || doc.filename)}</div>
+                             ${matchBadge}
+                          </div>
+                          <div class="small">${escapeHtml(doc.subject || '—')} • ${escapeHtml(docType)} • ${new Date(uploadDate).toLocaleString()}</div>
+                          <div style="margin-top:4px">${tagsHtml}</div>
+                          <div style="margin-top:4px;display:flex;gap:12px;font-size:12px;color:var(--muted)">
+                            <span>❤️ ${likes} likes</span>
+                            <span>💬 ${reviewsCount} reviews</span>
+                          </div>
+                        </div>
+                        <div style="display:flex;gap:8px">
+                          <button class="btn" onclick="selectAndOpen('${doc.id}')">Open</button>
+                          <button class="btn" onclick="bookmarkDoc('${doc.id}')">Bookmark</button>
+                          
+                     
+                          <button class="btn" onclick="deleteDoc('${doc.id}')">Delete</button>
+                          
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+
+            // Pagination Controls
+            const pag = document.getElementById('libraryPagination');
+            if (pag) {
+                if (total === 0) {
+                    pag.innerHTML = '';
+                } else {
+                    let phtml = '';
+                    phtml += `<button class="pageBtn ${page === 1 ? 'active' : ''}" onclick="renderLibrary(1)">« First</button>`;
+                    phtml += `<button class="pageBtn ${page === 1 ? 'active' : ''}" onclick="renderLibrary(${Math.max(1, page - 1)})">‹ Prev</button>`;
+
+                    for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
+                        phtml += `<button class="pageBtn ${i === page ? 'active' : ''}" onclick="renderLibrary(${i})">${i}</button>`;
+                    }
+
+                    phtml += `<button class="pageBtn ${page === totalPages ? 'active' : ''}" onclick="renderLibrary(${Math.min(totalPages, page + 1)})">Next ›</button>`;
+                    phtml += `<button class="pageBtn ${page === totalPages ? 'active' : ''}" onclick="renderLibrary(${totalPages})">Last »</button>`;
+                    pag.innerHTML = phtml;
+                }
+            }
+
+            container.scrollIntoView({ behavior: 'smooth' });
+            if (highlightId) {
+                setTimeout(() => {
+                    const el = document.getElementById('card_' + highlightId);
+                    if (el) {
+                        el.style.boxShadow = '0 18px 46px rgba(124,58,237,0.12)';
+                        setTimeout(() => el.style.boxShadow = '0 8px 24px rgba(9,30,66,0.04)', 1800);
+                    }
+                }, 100);
+            }
+        }
+
+
+        function setView(v) {
+            state.view = v;
+            renderLibrary(state.currentLibraryPage);
+        }
+
+        function clearLibraryFilters() {
+            const subj = document.getElementById('filterSubject');
+            const type = document.getElementById('filterType');
+            const sort = document.getElementById('sortSelect');
+
+            if (subj) subj.value = '';
+            if (type) type.value = '';
+            if (sort) sort.value = 'likes';
+
+            renderLibrary(1);
+        }
+
+        function selectDoc(id) {
+            let doc = state.docs.find(d => d.id === id);
+            if (!doc && state.results.length > 0) {
+                const res = state.results.find(r => r.document && r.document.id === id);
+                if (res) doc = res.document;
+            }
+            state.selected = doc || null;
+        }
+
+        function openReview(id) {
+            openReviewModal(id);
+        }
+
+        function openReviewModal(id) {
+            const doc = state.docs.find(d => d.id === id);
+            if (!doc) return;
+
+            openModal('Write Review', `
+    <div style="text-align:center">
+      <div style="font-weight:700;margin-bottom:8px">${escapeHtml(doc.title)}</div>
+      <div style="margin-bottom:16px">Rate this material:</div>
+      <div style="display:flex;justify-content:center;gap:8px;margin-bottom:16px">
+        ${[1, 2, 3, 4, 5].map(i => `
+          <button class="star-btn" onclick="setRating(${i})" data-rating="${i}" style="background:none;border:none;font-size:24px;cursor:pointer;color:${i <= 3 ? '#f59e0b' : '#d1d5db'}">★</button>
+        `).join('')}
+      </div>
+      <textarea id="reviewText" placeholder="Write your review here..." style="width:100%;height:100px;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.1);margin-bottom:16px"></textarea>
+      <button class="btn-primary" onclick="submitReview('${doc.id}')">Submit Review</button>
+    </div>
+  `);
+        }
+
+        function setRating(r) {
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(s => {
+                const val = parseInt(s.dataset.rating);
+                s.style.color = val <= r ? '#f59e0b' : '#d1d5db';
+            });
+        }
+
+        async function submitReview(docId) {
+            const reviewText = document.getElementById('reviewText').value.trim();
+            const stars = document.querySelectorAll('.star-btn');
+
+            let rating = 3;
+            stars.forEach(star => {
+                if (star.style.color === 'rgb(245, 158, 11)') {
+                    rating = Math.max(rating, parseInt(star.dataset.rating));
+                }
+            });
+
+            if (!reviewText) {
+                alert("Please write a review.");
+                return;
+            }
+
+            try {
+                const data = await apiRequest(`/documents/${docId}/review`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        text: reviewText,
+                        rating: rating,
+                        author: state.role === 'teacher' ? 'Teacher' : 'Student'
+                    })
+                });
+
+                const doc = state.docs.find(d => d.id === docId);
+                if (doc) {
+                    if (!doc.reviews) doc.reviews = [];
+                    doc.reviews.unshift(data.review);
+                }
+
+                showToast("Review submitted! 💬");
+                closeAllModals();
+                renderLibrary(state.currentLibraryPage);
+
+            } catch (err) {
+                console.error("Review failed:", err);
+                showToast("Review failed");
+            }
+        }
+        /* SEARCH */
+        async function topSearch() {
+            const query = (document.getElementById('topSearch').value || '').trim();
+            console.log('Searching for:', query);
+            if (!query) {
+                clearSearch();
+                return;
+            }
+
+            const searchResultsContainer = document.getElementById('searchResultsContainer');
+            searchResultsContainer.innerHTML = '<div class="spinner"></div><div class="small" style="text-align:center;margin-top:8px">Searching...</div>';
+
+            const searchResultsArea = document.getElementById('searchResultsArea');
+            searchResultsArea.style.display = 'block';
+
+            try {
+                const searchTypeElement = document.querySelector('.search-type-btn.active');
+                let searchType = 'semantic';
+
+                if (searchTypeElement) {
+                    searchType = searchTypeElement.dataset.type || 'semantic';
+                }
+                console.log('Using search type:', searchType);
+                const searchData = {
+                    query: query,
+                    search_type: searchType,
+                    page: 1,
+                    page_size: 10
+                };
+
+                const data = await apiRequest('/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(searchData)
+                });
+
+                state.isSearching = true;
+                state.currentQuery = query;
+                state.results = data.results || [];
+                renderLibrary(1);
+                console.log('Search results:', state.results);
+            } catch (error) {
+                console.error('Search failed:', error);
+                searchResultsContainer.innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--muted)">
+        <div>Search error: ${error.message}</div>
+        <div class="small" style="margin-top:8px">Trying local search as fallback...</div>
+      </div>
+    `;
+
+                setTimeout(() => {
+                    fallbackSearch(query);
+                }, 1000);
+            }
+        }
+
+
+        function fallbackSearch(query) {
+            const hits = state.docs.filter(d => {
+                const hay = `${d.title} ${d.content || ''} ${d.filename} ${d.subject || ''}`.toLowerCase();
+                return query.toLowerCase().split(/\s+/).every(tok => hay.includes(tok));
+            }).map(doc => ({
+                document: doc,
+                score: Math.random() * 0.5 + 0.5,
+                highlights: [
+                    `Found match for "${query}" in ${doc.title}`,
+                    doc.content.substring(0, 150) + '...'
+                ],
+                search_type: 'keyword'
+            }));
+
+            state.isSearching = true;
+            state.currentQuery = query;
+            state.results = hits;
+            renderLibrary(1);
+        }
+
+        function clearSearch() {
+            state.isSearching = false;
+            state.currentQuery = '';
+            state.results = [];
+            const topSearch = document.getElementById('topSearch');
+            if (topSearch) topSearch.value = '';
+            renderLibrary(1);
+        }
+
+        function selectAndOpen(id) {
+            selectDoc(id);
+            openPreviewModalById(id);
+        }
+
+        /* PREVIEW MODAL */
+        async function openPreviewModalById(id) {
+            try {
+                const data = await apiRequest(`/documents/${id}`);
+                let doc = data.document;
+                if (!doc) {
+                    doc = state.docs.find(d => d.id === id);
+                    if (!doc && state.results.length > 0) {
+                        const res = state.results.find(r => r.document && r.document.id === id);
+                        if (res) doc = res.document;
+                    }
+                    if (!doc) return alert('Doc not found');
+                }
+                state.selected = doc;
+                openPreviewModalFor(doc);
+            } catch (error) {
+                let doc = state.docs.find(d => d.id === id);
+                if (!doc && state.results.length > 0) {
+                    const res = state.results.find(r => r.document && r.document.id === id);
+                    if (res) doc = res.document;
+                }
+                if (!doc) return alert('Doc not found');
+                state.selected = doc;
+                openPreviewModalFor(doc);
+            }
+        }
+
+        function openPreviewModalFor(doc) {
+            const overlay = document.createElement('div');
+            overlay.className = 'modalOverlay';
+            overlay.id = 'previewOverlay';
+
+            const box = document.createElement('div');
+            box.className = 'modalBox';
+
+            const docType = doc.document_type || doc.type || 'file';
+            const tagsHtml = (doc.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+            const likes = doc.likes || 0;
+            const reviewsCount = (doc.reviews && doc.reviews.length) || 0;
+
+            box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-weight:800">${escapeHtml(doc.title || doc.filename)}</div>
+        <div class="small">${escapeHtml(doc.subject || '—')} • ${escapeHtml(docType)}</div>
+        <div style="margin-top:4px">${tagsHtml}</div>
+        <div style="margin-top:4px;display:flex;gap:12px;font-size:12px;color:var(--muted)">
+          <span>❤️ ${likes} likes</span>
+          <span>💬 ${reviewsCount} reviews</span>
+        </div>
+      </div>
+      <div><button class="btn" onclick="closeModal()">Close</button></div>
+    </div>
+    <div style="margin-top:10px">
+      ${(doc.content && doc.content.length) ?
+                    `<pre style="white-space:pre-wrap">${escapeHtml(doc.content)}</pre>` :
+                    (doc.blob ?
+                        `<iframe src="${doc.blob}" style="width:100%;height:70vh;border:0"></iframe>` :
+                        `<div class="small">No extracted text. Backend OCR/indexing required.</div>`
+                    )
+                }
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="downloadDoc('${doc.id}')">Download</button>
+      <span class="btn" style="cursor:default;background:transparent;border:1px solid rgba(15,23,42,0.1)">❤️ ${likes}</span>
+    </div>
+    
+    ${doc.reviews && doc.reviews.length > 0 ? `
+      <div style="margin-top:20px">
+        <div style="font-weight:700;margin-bottom:12px">User Reviews (${reviewsCount})</div>
+        ${doc.reviews.map(review => `
+          <div class="review-display">
+            <div style="display:flex;justify-content:between;align-items:center;margin-bottom:8px">
+              <div class="review-author">${escapeHtml(review.author)}</div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <span style="color:#f59e0b">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>
+                <span class="small">${new Date(review.date).toLocaleDateString()}</span>
+              </div>
+            </div>
+            <div class="review-text">${escapeHtml(review.text)}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : `
+      <div style="margin-top:20px;text-align:center;padding:20px;color:var(--muted)">
+        <div>No reviews yet</div>
+        <div class="small">Be the first to share your thoughts!</div>
+      </div>
+    `}
+  `;
+
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+        }
+
+        function closeModal() {
+            const el = document.getElementById('previewOverlay');
+            if (el) el.remove();
+        }
+
+        /* DOWNLOAD */
+        function downloadDoc(id) {
+            const d = state.docs.find(x => x.id === id);
+            if (!d) return alert('Not found');
+
+            // Use backend download route
+            window.location.href = `${API_BASE_URL}/documents/${id}/download`;
+        }
+        function bookmarkDoc(id) {
+            let bm = JSON.parse(localStorage.getItem('smart_bmarks') || '[]');
+            if (!bm.includes(id)) bm.push(id);
+            localStorage.setItem('smart_bmarks', JSON.stringify(bm));
+            showToast('Bookmarked');
+            renderBookmarks();
+        }
+
+        function renderBookmarks() {
+            const container = document.getElementById('bookmarksContainer');
+            const bm = JSON.parse(localStorage.getItem('smart_bmarks') || '[]');
+
+            if (!bm.length) {
+                container.innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--muted)">
+        <div>No bookmarks yet</div>
+        <div class="small" style="margin-top:8px">Bookmark documents to see them here</div>
+      </div>
+    `;
+                return;
+            }
+
+            const html = bm.map(id => {
+                const d = state.docs.find(x => x.id === id);
+                if (!d) return '';
+                const tagsHtml = (d.tags || []).map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+                const likes = d.likes || 0;
+                const reviewsCount = (d.reviews && d.reviews.length) || 0;
+
+                return `<div class="cardItem" style="margin-bottom:8px">
+      <div style="font-weight:700">${escapeHtml(d.title || d.filename)}</div>
+      <div class="small">${escapeHtml(d.subject || '—')}</div>
+      <div style="margin-top:4px">${tagsHtml}</div>
+      <div style="margin-top:4px;display:flex;gap:12px;font-size:12px;color:var(--muted)">
+        <span>❤️ ${likes} likes</span>
+        <span>💬 ${reviewsCount} reviews</span>
+      </div>
+      <div style="margin-top:8px">
+        <button class="btn" onclick="openPreviewModalById('${d.id}')">Open</button>
+      </div>
+    </div>`;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        /* REQUESTS FUNCTIONALITY */
+        function openRequestModal() {
+            openModal('Request Material', `
+    <div>
+      <div style="margin-bottom:16px">
+        <div style="font-weight:700">Request New Material</div>
+        <div class="small">Let us know what materials you need for your studies</div>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-weight:600;margin-bottom:8px">Title</label>
+        <input id="requestTitle" placeholder="e.g., Advanced Calculus Textbook" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.1);background:var(--card);color:var(--text)">
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-weight:600;margin-bottom:8px">Subject</label>
+        <select id="requestSubject" style="width:100%;padding:10px;border-radius:88px;border:1px solid rgba(15,23,42,0.1);background:var(--card);color:var(--text)">
+          <option>Computer Science</option>
+          <option>Math</option>
+          <option>Physics</option>
+          <option>Electronics</option>
+          <option>Other</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-weight:600;margin-bottom:8px">Description</label>
+        <textarea id="requestDescription" placeholder="Describe the material you need, including specific topics, format preferences, and any other details..." style="width:100%;height:120px;padding:10px;border-radius:8px;border:1px solid rgba(15,23,42,0.1);background:var(--card);color:var(--text)"></textarea>
+      </div>
+      
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="submitRequest()">Submit Request</button>
+        <button class="btn" onclick="closeAllModals()">Cancel</button>
+      </div>
+    </div>
+  `);
+        }
+
+        function submitRequest() {
+            const title = document.getElementById('requestTitle').value.trim();
+            const subject = document.getElementById('requestSubject').value;
+            const description = document.getElementById('requestDescription').value.trim();
+
+            if (!title || !description) {
+                alert('Please fill in both title and description');
+                return;
+            }
+
+            const newRequest = {
+                id: uid(),
+                title: title,
+                subject: subject,
+                description: description,
+                status: 'pending',
+                requestedBy: 'Teacher',
+                date: now(),
+                upvotes: 0
+            };
+
+            state.requests.unshift(newRequest);
+            localStorage.setItem('smart_requests', JSON.stringify(state.requests));
+            showToast('Request submitted! 📋');
+            closeAllModals();
+            renderRequests();
+        }
+
+        function renderRequests() {
+            const container = document.getElementById('requestsContainer');
+
+            if (!state.requests.length) {
+                container.innerHTML = `
+      <div style="text-align:center;padding:40px;color:var(--muted)">
+        <div>No requests yet</div>
+        <div class="small" style="margin-top:8px">Be the first to request materials you need!</div>
+      </div>
+    `;
+                return;
+            }
+
+            const html = state.requests.map(req => {
+                const statusClass = req.status === 'fulfilled' ? 'status-fulfilled' : 'status-pending';
+
+                return `
+      <div class="request-card">
+        <div class="request-header">
+          <div class="request-title">${escapeHtml(req.title)}</div>
+          <div class="request-status ${statusClass}">${req.status}</div>
+        </div>
+        <div class="request-meta">
+          <span>${escapeHtml(req.subject)}</span>
+          <span>Requested by ${escapeHtml(req.requestedBy)}</span>
+          <span>${new Date(req.date).toLocaleDateString()}</span>
+        </div>
+        <div class="request-description">${escapeHtml(req.description)}</div>
+        <div class="request-actions">
+          <button class="btn" onclick="upvoteRequest('${req.id}')">👍 ${req.upvotes || 0}</button>
+          <button class="btn" onclick="fulfillRequest('${req.id}')">Mark as Fulfilled</button>
+          <button class="btn" onclick="deleteRequest('${req.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        function upvoteRequest(id) {
+            const request = state.requests.find(r => r.id === id);
+            if (!request) return;
+
+            if (!request.upvotes) request.upvotes = 0;
+            request.upvotes += 1;
+
+            localStorage.setItem('smart_requests', JSON.stringify(state.requests));
+            renderRequests();
+            showToast('Upvoted request!');
+        }
+
+        function fulfillRequest(id) {
+            const request = state.requests.find(r => r.id === id);
+            if (!request) return;
+
+            request.status = 'fulfilled';
+            localStorage.setItem('smart_requests', JSON.stringify(state.requests));
+            renderRequests();
+            showToast('Request marked as fulfilled');
+        }
+
+        function deleteRequest(id) {
+            if (!confirm('Delete this request?')) return;
+
+            state.requests = state.requests.filter(r => r.id !== id);
+            localStorage.setItem('smart_requests', JSON.stringify(state.requests));
+            renderRequests();
+            showToast('Request deleted');
+        }
+
+        /* DELETE DOC */
+        async function deleteDoc(id) {
+            if (!confirm('Delete document?')) return;
+
+            try {
+                await apiRequest(`/documents/${id}`, { method: 'DELETE' });
+                state.docs = state.docs.filter(d => d.id !== id);
+                showToast('Document deleted');
+                renderLibrary(state.currentLibraryPage);
+            } catch (error) {
+                console.error('Delete failed:', error);
+                state.docs = state.docs.filter(d => d.id !== id);
+                showToast('Document deleted (local)');
+                renderLibrary(state.currentLibraryPage);
+            }
+        }
+
+
+
+        /* EXPORT / IMPORT / CLEAR */
+        function exportLibrary() {
+            const dataStr = JSON.stringify(state.docs, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'smart_library_export.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importLibrary() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+
+            if (!file) return alert('Pick a JSON file');
+
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        state.docs = data.concat(state.docs);
+                        localStorage.setItem('smart_docs', JSON.stringify(state.docs));
+                        showToast('Library imported successfully');
+                        renderLibrary(1);
+                    } else {
+                        alert('Invalid format: Expected an array of documents');
+                    }
+                } catch (err) {
+                    alert('Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function clearStorage() {
+            if (!confirm('WARNING: This will delete ALL documents and data from the server and local storage. This cannot be undone. Are you sure?')) return;
+
+            try {
+                showToast('Clearing system data...');
+                await apiRequest('/admin/reset', { method: 'POST' });
+
+                localStorage.removeItem('smart_docs');
+                localStorage.removeItem('smart_bmarks');
+                localStorage.removeItem('smart_requests');
+
+                state.docs = [];
+                state.results = [];
+                renderLibrary(1);
+
+                showToast('System reset complete');
+            } catch (error) {
+                console.error('Reset failed:', error);
+                showToast('Failed to reset system');
+            }
+        }
+
+        /* DEVELOPER TOOLS */
+        async function reindexDocuments() {
+            try {
+                showToast('Reindexing documents...');
+                const response = await apiRequest('/admin/reindex-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                showToast(`Reindexing complete: ${response.successfully_indexed || state.docs.length} documents indexed`);
+                await loadDocs();
+            } catch (error) {
+                console.error('Reindexing failed:', error);
+                showToast('Reindexing failed');
+            }
+        }
+
+        async function checkSystemStatus() {
+            try {
+                const response = await apiRequest('/debug/status');
+                openModal('System Status', `
+      <div style="font-family:monospace;font-size:14px">
+        <pre>${JSON.stringify(response, null, 2)}</pre>
+      </div>
+    `);
+                return response;
+            } catch (error) {
+                console.error('Status check failed:', error);
+                openModal('System Status', `
+      <div>
+        <p>Unable to connect to backend system.</p>
+        <p>Documents in library: ${state.docs.length}</p>
+      </div>
+    `);
+                return null;
+            }
+        }
+
+        async function testBackendSearch() {
+            const testQueries = ['operating system', 'database', 'computer science'];
+            openModal('Backend Search Test', `
+    <div>
+      <div class="small">Testing search with queries: ${testQueries.join(', ')}</div>
+      <div id="searchTestResults" style="margin-top:10px;max-height:300px;overflow:auto"></div>
+    </div>
+  `);
+
+            const resultsContainer = document.getElementById('searchTestResults');
+
+            for (const query of testQueries) {
+                try {
+                    resultsContainer.innerHTML += `<div class="small">Testing: "${query}"...</div>`;
+                    const data = await apiRequest('/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query, search_type: 'keyword', page_size: 3 })
+                    });
+                    resultsContainer.innerHTML += `
+        <div style="margin:5px 0;padding:5px;background:var(--panel);border-radius:4px">
+          <b>"${query}":</b> ${data.results ? data.results.length + ' results' : 'No results'}
+        </div>
+      `;
+                } catch (error) {
+                    resultsContainer.innerHTML += `
+        <div style="margin:5px 0;padding:5px;background:#fef2f2;border-radius:4px;color:#dc2626">
+          <b>"${query}":</b> Error - ${error.message}
+        </div>
+      `;
+                }
+            }
+        }
+
+        /* MODAL HELPERS */
+        function openModal(title, html) {
+            const root = document.getElementById('modalRoot');
+            const overlay = document.createElement('div');
+            overlay.className = 'modalOverlay';
+
+            const box = document.createElement('div');
+            box.className = 'modalBox';
+            box.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:800">${escapeHtml(title)}</div>
+      <div><button class="btn" onclick="closeAllModals()">Close</button></div>
+    </div>
+    <div style="margin-top:10px">${html}</div>
+  `;
+
+            overlay.appendChild(box);
+            root.appendChild(overlay);
+        }
+
+        function closeAllModals() {
+            document.getElementById('modalRoot').innerHTML = '';
+        }
+
+        /* DARK MODE */
+        function toggleDark() {
+            state.darkMode = !state.darkMode;
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            localStorage.setItem('smart_dark', state.darkMode);
+            showToast(state.darkMode ? 'Dark mode enabled' : 'Light mode enabled');
+        }
+
+        // Initialize the application
+        init();
+
+        /* Global functions for console access */
+        window.showPage = showPage;
+        window.renderLibrary = renderLibrary;
+        window.selectDoc = selectDoc;
+        window.openPreviewModalById = openPreviewModalById;
+        window.deleteDoc = deleteDoc;
+        window.toggleUpload = toggleUpload;
+        window.exportLibrary = exportLibrary;
+        window.importLibrary = importLibrary;
+        window.clearStorage = clearStorage;
+        window.reindexDocuments = reindexDocuments;
+        window.checkSystemStatus = checkSystemStatus;
+        window.testBackendSearch = testBackendSearch;
+
+    </script>
+</body>
+
+</html>
