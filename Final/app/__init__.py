@@ -45,9 +45,9 @@ def create_app():
     app.elasticsearch = Elasticsearch(**es_params)
     
     # Register blueprints
-    from app.routes.documents import documents_bp
-    from app.routes.search import search_bp
-    from app.routes.admin import admin_bp
+    from Final.app.routes.documents import documents_bp
+    from Final.app.routes.search import search_bp
+    from Final.app.routes.admin import admin_bp
     
     app.register_blueprint(documents_bp, url_prefix='/api')
     app.register_blueprint(search_bp, url_prefix='/api')
@@ -99,9 +99,9 @@ def create_app():
     app.elasticsearch = Elasticsearch(**es_params)
     
     # Register blueprints
-    from app.routes.documents import documents_bp
-    from app.routes.search import search_bp
-    from app.routes.admin import admin_bp
+    from Final.app.routes.documents import documents_bp
+    from Final.app.routes.search import search_bp
+    from Final.app.routes.admin import admin_bp
     
     app.register_blueprint(documents_bp, url_prefix='/api')
     app.register_blueprint(search_bp, url_prefix='/api')
@@ -112,3 +112,4 @@ def create_app():
     
 
     return app
+
