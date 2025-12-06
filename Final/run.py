@@ -1,6 +1,7 @@
-from app import create_app
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-import os
+from app import create_app
 
 app = create_app()
 
@@ -9,4 +10,5 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=5000,
         debug=os.environ.get('FLASK_ENV') == 'development'
+
     )
