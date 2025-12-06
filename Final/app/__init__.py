@@ -15,7 +15,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration
-    app.config.from_object('app.config.Config')
+    app.config.from_object('Final.app.config.Config')
     
     # Initialize extensions
     cors.init_app(app)
@@ -69,7 +69,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configuration
-    app.config.from_object('app.config.Config')
+    app.config.from_object('Final.app.config.Config')
     
     # Initialize extensions
     cors.init_app(app)
@@ -110,4 +110,5 @@ def create_app():
     # Create upload directory
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
+
     return app
