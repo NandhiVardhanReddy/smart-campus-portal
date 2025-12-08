@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Smart Summarizer</title>
+    <style>
+        body { background: #dbe6ff; font-family: Arial; padding: 30px; display: flex; justify-content: center;}
+        .container { width: 750px; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 25px rgba(0,0,0,0.2);}
+        h2 { text-align:center; color:#1e3a8a; }
+        textarea { width:100%; height:120px; padding:12px; font-size:16px; border-radius:10px; border:1px solid #aaa; resize:none;}
+        .file-box { margin-top:15px; background:#eef4ff; padding:12px; border-radius:10px; border:1px dashed #1e40af;}
+        #fileInput { display:none; }
+        .choose-btn { background:#1e3a8a; color:white; padding:10px 18px; border:none; cursor:pointer; border-radius:8px; font-size:15px; }
+        .choose-btn:hover { background:#1e40af; }
+        #fileName { margin-left:10px; font-size:14px; }
+        .btn-row { margin-top:15px; }
+        button { background:#2563eb; padding:12px 20px; border:none; color:white; cursor:pointer; border-radius:8px; font-size:16px; margin-right:10px; }
+        button:hover { background:#1e40af; }
+        #summaryBox { margin-top:20px; background:#e9f0ff; padding:15px; border-radius:10px; min-height:100px; font-size:15px; white-space:pre-wrap; overflow-y:auto; max-height:200px;}
+        select { padding:10px; font-size:15px; border-radius:10px; border:1px solid #1e3a8a; background:#f0f5ff; color:#1e3a8a; margin-bottom:10px; font-weight:bold; }
+        .reset-btn { background:#e11d48; }
+        .reset-btn:hover { background:#be123c; }
+        #historyBox { margin-top:20px; background:#fff7ed; padding:12px; border-radius:10px; max-height:250px; overflow-y:auto;}
+        .history-item { padding:10px; border-bottom:1px solid #ccc; position: relative; }
+        .delete-btn { background:#e11d48; color:white; border:none; padding:5px 10px; cursor:pointer; border-radius:5px; float:right; }
+        .delete-btn:hover { background:#be123c; }
+        .clear-container { display:flex; justify-content:flex-end; margin-bottom:10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>AI Smart Summarizer</h2>
+    <textarea id="inputText" placeholder="Type text here in any language..."></textarea>
+    <div class="file-box">
+        <label class="choose-btn" for="fileInput">Choose File</label>
+        <span id="fileName">No file selected</span>
+        <input id="fileInput" type="file" accept=".pdf,.docx,.txt">
+    </div>
+
+    <label style="font-weight:bold;">Select Preferred Summary Language:</label>
+    <select id="summarizeLang">
+        <option value="">Same as input</option>
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="te">Telugu</option>
+        <option value="ta">Tamil</option>
+        <option value="ml">Malayalam</option>
+        <option value="kn">Kannada</option>
+    </select>
+
+    <div class="btn-row">
+        <button onclick="summarize(this)">Summarize</button>
+    </div>
+
+    <h3>Summary:</h3>
+    <div id="summaryBox">Your summary will appear here...</div>
+    <button onclick="downloadPDF()" style="margin-top:15px; background:#0ea5e9;">Download Summary as PDF</button>
+    <button class="reset-btn" onclick="resetAll()" style="margin-top:30px;">Reset All</button>
+
+    <h3 style="margin-top:20px;">History:</h3>
+    <div class="clear-container">
+        <button class="reset-btn" onclick="clearAll()">Clear All History</button>
+    </div>
+    <div id="historyBox">Loading history...</div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+// File Name Preview
+document.getElementById("fileInput").addEventListener("change", function () {
+    let file = this.files[0];
+    document.getElementById("fileName").innerText = file ? file.name : "No file selected";
+});
+
+// Summarize
+async function summarize(btn) {
+    btn.disabled = true;
+    btn.innerText = "Summarizing...";
+    const text = document.getElementById("inputText").value.trim();
+    const lang = document.getElementById("summarizeLang").value || "";
+    const file = document.getElementById("fileInput").files[0];
+
+    // Prompt for summary length
+    let wordCount = prompt("Enter summary word count (e.g., 50, 100, 150):", "100");
+    if (!wordCount || isNaN(wordCount) || parseInt(wordCount)<=0) {
+        alert("Please enter a valid number!");
+        btn.disabled = false;
+        btn.innerText = "Summarize";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("text", text);
+    formData.append("lang", lang);
+    formData.append("summary_length", parseInt(wordCount));
+    if(file) formData.append("file", file);
+
+    let res = await fetch(`${API}/summarize`, { method: "POST", body: formData });
+    let data = await res.json();
+    document.getElementById("summaryBox").innerText = data.summary || data.error;
+    btn.disabled = false;
+    btn.innerText = "Summarize";
+    loadHistory();
+}
+
+// Download PDF
+async function downloadPDF() {
+    let text = document.getElementById("summaryBox").innerText;
+    if(!text.trim()){ alert("No summary to download!"); return; }
+    let res = await fetch(`${API}/download`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text}) });
+    let blob = await res.blob();
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "summary.pdf";
+    a.click();
+}
+
+// Reset
+function resetAll() {
+    document.getElementById("inputText").value = "";
+    document.getElementById("fileInput").value = "";
+    document.getElementById("fileName").innerText = "No file selected";
+    document.getElementById("summaryBox").innerText = "Your summary will appear here...";
+    document.getElementById("summarizeLang").value = "";
+}
+
+// History
+async function loadHistory() {
+    let res = await fetch(`${API}/history`);
+    let data = await res.json();
+    let html = "";
+    data.forEach(item => {
+        html += `<div class="history-item">
+                    <b>Input:</b> ${item.text.substring(0,80)}...<br>
+                    <b>Summary:</b> ${item.summary}<br>
+                    <b>Date:</b> ${new Date(item.timestamp).toLocaleString()}
+                    <button class="delete-btn" onclick="deleteItem('${item._id}')">Delete</button>
+                 </div>`;
+    });
+    document.getElementById("historyBox").innerHTML = html || "No history yet.";
+}
+
+async function deleteItem(id) {
+    await fetch(`${API}/history/${id}`, { method:"DELETE" });
+    loadHistory();
+}
+
+async function clearAll() {
+    if(!confirm("Are you sure you want to clear all history?")) return;
+    await fetch(`${API}/history`, { method:"DELETE" });
+    loadHistory();
+}
+
+// Initial load
+loadHistory();
+</script>
+</body>
+</html>
